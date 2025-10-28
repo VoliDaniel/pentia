@@ -68,14 +68,31 @@ export function MonthlyOrdersChart({ data }: MonthlyOrdersChartProps) {
                   labelFormatter={(_, payload) =>
                     payload?.[0]?.payload?.label ?? ""
                   }
-                  formatter={(value) => {
+                  formatter={(value, _name, item) => {
                     const numericValue =
                       typeof value === "number" ? value : Number(value)
                     const formattedValue = Number.isFinite(numericValue)
                       ? numericValue.toLocaleString("da-DK")
                       : String(value)
+                    const rawItem = item as { payload?: unknown } | undefined
+                    const payloadData =
+                      rawItem?.payload && typeof rawItem.payload === "object"
+                        ? (rawItem.payload as {
+                            label?: string
+                            month?: string
+                          })
+                        : undefined
+                    const monthLabel =
+                      typeof payloadData?.label === "string"
+                        ? payloadData.label
+                        : typeof payloadData?.month === "string"
+                          ? payloadData.month
+                          : ""
+                    const ordersText = `${formattedValue} Orders`
 
-                    return [formattedValue, "Orders"]
+                    return monthLabel
+                      ? `${ordersText} (${monthLabel})`
+                      : ordersText
                   }}
                 />
               }

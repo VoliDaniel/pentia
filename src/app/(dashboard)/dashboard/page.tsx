@@ -173,31 +173,8 @@ export default async function DashboardPage() {
         </Card>
       </section>
 
-      <section className="grid gap-4 xl:grid-cols-[2fr_1fr]">
+      <section className="grid gap-4">
         <MonthlyOrdersChart data={monthlyData} />
-        <Card>
-          <CardHeader>
-            <CardTitle>Monthly breakdown</CardTitle>
-            <CardDescription>
-              Quick reference of orders per month.
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            <ul className="divide-y divide-border rounded-md border">
-              {monthlyData.map((month) => (
-                <li
-                  key={month.month}
-                  className="flex items-center justify-between gap-4 px-4 py-2"
-                >
-                  <span className="text-sm font-medium">{month.label}</span>
-                  <span className="text-sm text-muted-foreground">
-                    {month.count.toLocaleString("da-DK")} orders
-                  </span>
-                </li>
-              ))}
-            </ul>
-          </CardContent>
-        </Card>
       </section>
     </div>
   )
