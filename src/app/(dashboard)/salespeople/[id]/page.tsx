@@ -29,9 +29,9 @@ import { fetchOrderLines, fetchSalesPeople } from "@/lib/api"
 import { formatOrderDate, parseOrderDate } from "@/lib/order-date"
 
 type SalesPersonDetailPageProps = {
-  params: {
+  params: Promise<{
     id: string
-  }
+  }>
 }
 
 const currencyFormatter = new Intl.NumberFormat("da-DK", {
@@ -51,7 +51,8 @@ function formatCurrency(amount: number | null | undefined) {
 export default async function SalesPersonDetailPage({
   params,
 }: SalesPersonDetailPageProps) {
-  const salesPersonId = Number(params.id)
+  const { id } = await params
+  const salesPersonId = Number(id)
 
   if (Number.isNaN(salesPersonId)) {
     notFound()
@@ -102,7 +103,7 @@ export default async function SalesPersonDetailPage({
             {person.name ?? "Salesperson"}
           </h1>
           <p className="text-muted-foreground">
-            Hired {person.hireDate ?? "Unknown date"} •{" "}
+            Hired {person.hireDate ?? "Unknown date"} -{" "}
             {personOrders.length.toLocaleString("da-DK")} orders
           </p>
         </div>

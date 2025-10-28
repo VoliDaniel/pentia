@@ -1,5 +1,6 @@
 import Link from "next/link"
 
+import { SalesPeopleTable } from "@/components/salespeople-table"
 import { Button } from "@/components/ui/button"
 import {
   Card,
@@ -8,14 +9,6 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card"
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table"
 import { fetchOrderLines, fetchSalesPeople } from "@/lib/api"
 
 export default async function SalesPeoplePage() {
@@ -32,11 +25,10 @@ export default async function SalesPeoplePage() {
     {}
   )
 
-  const sortedSalesPeople = [...salesPeople].sort((a, b) => {
-    const nameA = a.name ?? ""
-    const nameB = b.name ?? ""
-    return nameA.localeCompare(nameB)
-  })
+  const peopleWithOrderCounts = salesPeople.map((person) => ({
+    ...person,
+    orderCount: orderCounts[person.id] ?? 0,
+  }))
 
   return (
     <div className="flex flex-col gap-6">
@@ -69,44 +61,7 @@ export default async function SalesPeoplePage() {
           </Button>
         </CardHeader>
         <CardContent>
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>Name</TableHead>
-                <TableHead>Location</TableHead>
-                <TableHead className="text-right">Orders</TableHead>
-                <TableHead className="text-right">Actions</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {sortedSalesPeople.map((person) => {
-                const orderCount = orderCounts[person.id] ?? 0
-                return (
-                  <TableRow key={person.id}>
-                    <TableCell className="font-medium">
-                      {person.name ?? "Unknown"}
-                    </TableCell>
-                    <TableCell>
-                      <div className="flex flex-col text-sm text-muted-foreground">
-                        <span>{person.city ?? "City unavailable"}</span>
-                        <span>{person.zipCode ?? "Zip unavailable"}</span>
-                      </div>
-                    </TableCell>
-                    <TableCell className="text-right font-semibold">
-                      {orderCount.toLocaleString("da-DK")}
-                    </TableCell>
-                    <TableCell className="text-right">
-                      <Button asChild size="sm" variant="outline">
-                        <Link href={`/salespeople/${person.id}`}>
-                          View details
-                        </Link>
-                      </Button>
-                    </TableCell>
-                  </TableRow>
-                )
-              })}
-            </TableBody>
-          </Table>
+          <SalesPeopleTable people={peopleWithOrderCounts} />
         </CardContent>
       </Card>
     </div>
