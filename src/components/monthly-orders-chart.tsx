@@ -43,7 +43,7 @@ export function MonthlyOrdersChart({ data }: MonthlyOrdersChartProps) {
       <CardContent className="px-0 pb-2 sm:px-4">
         <ChartContainer
           config={chartConfig}
-          className="aspect-[16/9] h-[360px] w-full"
+          className="aspect-video h-[360px] w-full"
         >
           <BarChart data={data}>
             <CartesianGrid vertical={false} strokeDasharray="3 3" />

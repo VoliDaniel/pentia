@@ -1,6 +1,7 @@
-import type { OrderLine } from "@/lib/api"
+import type { OrderLine, SalesPerson } from "@/lib/api"
 
 import { MonthlyOrdersChart } from "@/components/monthly-orders-chart"
+import { RevenueLeaderboard } from "@/components/revenue-leaderboard"
 import {
   Card,
   CardContent,
@@ -8,13 +9,19 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card"
-import { fetchOrderLines } from "@/lib/api"
+import { fetchOrderLines, fetchSalesPeople } from "@/lib/api"
 import { parseOrderDate } from "@/lib/order-date"
 
 type MonthlyDataPoint = {
   month: string
   label: string
   count: number
+}
+
+type RevenueLeader = {
+  id: number
+  name: string | null
+  revenue: number
 }
 
 function buildMonthlyTimeline(orderLines: OrderLine[]): MonthlyDataPoint[] {
@@ -85,11 +92,60 @@ function buildMonthlyTimeline(orderLines: OrderLine[]): MonthlyDataPoint[] {
   return result
 }
 
+function buildRevenueLeaderboard(
+  orderLines: OrderLine[],
+  salesPeople: SalesPerson[],
+  limit = 10
+): RevenueLeader[] {
+  const leadersById = new Map<number, RevenueLeader>()
+
+  for (const person of salesPeople) {
+    leadersById.set(person.id, {
+      id: person.id,
+      name: person.name,
+      revenue: 0,
+    })
+  }
+
+  for (const order of orderLines) {
+    if (typeof order.salesPersonId !== "number") {
+      continue
+    }
+
+    const orderValue = Number(order.orderPrice)
+    if (!Number.isFinite(orderValue)) {
+      continue
+    }
+
+    const existing =
+      leadersById.get(order.salesPersonId) ?? {
+        id: order.salesPersonId,
+        name: null,
+        revenue: 0,
+      }
+
+    existing.revenue += orderValue
+    leadersById.set(order.salesPersonId, existing)
+  }
+
+  return Array.from(leadersById.values())
+    .sort((a, b) => b.revenue - a.revenue)
+    .slice(0, Math.max(limit, 3))
+}
+
 export default async function DashboardPage() {
-  const orderLines = await fetchOrderLines()
+  const [orderLines, salesPeople] = await Promise.all([
+    fetchOrderLines(),
+    fetchSalesPeople(),
+  ])
   const monthlyData = buildMonthlyTimeline(orderLines)
   const totalOrders = orderLines.length
   const monthsTracked = monthlyData.length
+  const revenueLeaderboard = buildRevenueLeaderboard(
+    orderLines,
+    salesPeople,
+    10
+  )
 
   const busiestMonth = monthlyData.reduce<MonthlyDataPoint | null>(
     (current, month) => {
@@ -173,8 +229,9 @@ export default async function DashboardPage() {
         </Card>
       </section>
 
-      <section className="grid gap-4">
+      <section className="grid gap-4 lg:grid-cols-2 xl:grid-cols-[minmax(0,2fr)_minmax(0,1fr)]">
         <MonthlyOrdersChart data={monthlyData} />
+        <RevenueLeaderboard leaders={revenueLeaderboard} />
       </section>
     </div>
   )
