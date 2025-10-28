@@ -7,7 +7,7 @@ import { SidebarInset, SidebarProvider } from "@/components/ui/sidebar"
 const layoutStyle = {
   "--sidebar-width": "calc(var(--spacing) * 64)",
   "--header-height": "calc(var(--spacing) * 12)",
-} satisfies CSSProperties
+} as CSSProperties
 
 export default function DashboardLayout({
   children,

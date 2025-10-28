@@ -68,10 +68,15 @@ export function MonthlyOrdersChart({ data }: MonthlyOrdersChartProps) {
                   labelFormatter={(_, payload) =>
                     payload?.[0]?.payload?.label ?? ""
                   }
-                  formatter={(value: number) => [
-                    value.toLocaleString("da-DK"),
-                    "Orders",
-                  ]}
+                  formatter={(value) => {
+                    const numericValue =
+                      typeof value === "number" ? value : Number(value)
+                    const formattedValue = Number.isFinite(numericValue)
+                      ? numericValue.toLocaleString("da-DK")
+                      : String(value)
+
+                    return [formattedValue, "Orders"]
+                  }}
                 />
               }
             />
